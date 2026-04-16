@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+.env
+Audio/
+MP3/
+MP4/
+Separated/
+Thumbnails/
+tunebat_debug/
+run_report.json
+error_log.txt
+retry_queue.json
+checkpoint.json
+*.log

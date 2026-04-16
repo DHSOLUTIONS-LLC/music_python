@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sample Split</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Poppins:wght@300;400&display=swap" rel="stylesheet" />
+<style>
+  body { font-family:'Poppins',sans-serif; background:#0b0f1a; color:#f1f5f9; margin:0; padding:40px; display:flex; justify-content:center; }
+  .container { max-width:900px; width:100%; background:#151e3a; border-radius:16px; padding:32px; box-shadow:0 0 15px rgba(0,170,255,0.15); }
+  h2 { text-align:center; font-family:'Exo 2',sans-serif; font-size:28px; margin-bottom:30px; }
+  label { font-weight:500; font-size:14px; }
+  .section-header { font-family:'Exo 2',sans-serif; font-size:18px; color:#90cdf4; margin-top:30px; margin-bottom:10px; border-bottom:1px solid #2d3a68; padding-bottom:5px; }
+  .channels-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin:25px 0 35px; }
+  .channel-card { background:#10182d; border-radius:12px; padding:18px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid #1e2b4e; transition:border-color .3s,box-shadow .3s; }
+  .channel-card:hover { border-color:#3aa0ff; box-shadow:0 0 12px rgba(0,150,255,0.25); }
+  .channel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .channel-header label { display:flex; align-items:center; gap:8px; font-size:15px; }
+  .channel-header input[type="checkbox"] { width:16px; height:16px; accent-color:#007bff; }
+  .stems { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .stem-toggle { background:#1b2544; color:#d0d8ef; border:1px solid #2a3664; border-radius:6px; padding:4px 9px; font-size:12px; cursor:pointer; transition:all .2s; }
+  .stem-toggle.active { background:linear-gradient(135deg,#0066ff,#00ccff); color:#fff; border-color:transparent; box-shadow:0 0 6px rgba(0,170,255,0.3); }
+  .stem-toggle:hover { background:#23315a; }
+  .channel-comment { width:100%; border:none; border-radius:6px; background:#1b2544; color:#cbd5e1; padding:8px; font-size:12.5px; height:38px; resize:none; }
+  .channel-comment:focus { background:#24325e; outline:none; }
+  input[type="text"],input[type="number"],input[type="datetime-local"],select,textarea { width:100%; padding:10px; border-radius:8px; border:none; background:#2d3748; color:white; margin-bottom:16px; box-sizing:border-box; }
+  textarea { resize:none; }
+  .radio-row label,.checkbox-row label { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .split-button { display:block; width:100%; text-align:center; padding:12px 0; border-radius:10px; font-family:'Exo 2',sans-serif; font-weight:600; font-size:16px; color:white; background:linear-gradient(135deg,#00306f,#001a33); border:none; cursor:pointer; transition:box-shadow .3s,transform .3s; }
+  .split-button:hover { box-shadow:0 0 18px rgba(0,85,170,0.7); transform:scale(1.02); }
+  .split-button:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+  .progress-container { margin-top:20px; }
+  .progress-bar { width:100%; height:20px; border-radius:10px; background:#2d3748; overflow:hidden; }
+  .progress-fill { height:100%; width:0%; background:#007bff; transition:width .3s; }
+  .progress-label { margin-top:8px; font-size:13px; color:#cbd5e1; }
+  .track-info { margin-top:6px; font-size:12px; color:#90cdf4; min-height:18px; }
+  .badge-weblibrary { background:linear-gradient(135deg,#6600cc,#9900ff); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>🎵 Sample Split</h2>
+
+  <label for="playlistId">Playlist / Track / Artist ID</label>
+  <input type="text" id="playlistId" placeholder="Paste Spotify URL or ID..." />
+
+  <label>Upload to Channels</label>
+  <div class="channels-grid" id="channelsGrid"></div>
+
+  <div class="section-header">Scheduling</div>
+  <label for="scheduleStart">Start Time</label>
+  <input type="datetime-local" id="scheduleStart" />
+  <label for="interval">Interval</label>
+  <select id="interval">
+    <option value="Every Hour">Every Hour</option>
+    <option value="Every 2 Hours">Every 2 Hours</option>
+    <option value="Every 4 Hours">Every 4 Hours</option>
+    <option value="Daily">Daily</option>
+  </select>
+
+  <div class="section-header">Video Metadata</div>
+  <label for="genre">Genre</label>
+  <select id="genre">
+    <option value="hiphop">Hip-Hop</option>
+    <option value="rnb">R&amp;B</option>
+    <option value="jazz">Jazz</option>
+    <option value="soul">Soul</option>
+    <option value="rock">Rock</option>
+    <option value="pop">Pop</option>
+    <option value="electronic">Electronic</option>
+    <option value="world">World</option>
+  </select>
+  <label for="videoDesc">Default Video Description</label>
+  <textarea id="videoDesc" rows="3" placeholder="Include hashtags, links, etc."></textarea>
+  <label for="videoTags">YouTube Tags</label>
+  <input type="text" id="videoTags" placeholder="e.g. hiphop, remix, acapella" />
+  <label for="privacy">Privacy</label>
+  <select id="privacy">
+    <option value="public">Public</option>
+    <option value="unlisted">Unlisted</option>
+    <option value="private" selected>Private</option>
+  </select>
+  <label>Audience</label>
+  <div class="radio-row">
+    <label><input type="radio" name="audience" id="audienceKids" /> Made for Kids</label>
+    <label><input type="radio" name="audience" id="audienceNotKids" checked /> Not Made for Kids</label>
+  </div>
+
+  <div class="section-header">Options</div>
+  <div class="checkbox-row">
+    <label><input type="checkbox" id="monetize" /> Enable Monetization</label>
+    <label><input type="checkbox" id="uploadYouTube" checked /> Upload to Channel</label>
+    <label><input type="checkbox" id="trimTrack" /> Trim Track</label>
+  </div>
+  <label for="trimLength">Trim Length (seconds)</label>
+  <input type="number" id="trimLength" placeholder="e.g. 60" />
+
+  <button class="split-button" id="splitBtn" onclick="runSplit()">▶ Start Split</button>
+
+  <div class="progress-container">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressText">Ready</div>
+    <div class="track-info" id="trackInfo"></div>
+  </div>
+</div>
+
+<script>
+const stems = ["Acapella", "Drums", "Bass", "Instrumental", "Melody"];
+const channels = [
+  { label: "Main",         id: "mainchannel" },
+  { label: "SGS 2",        id: "sgs2" },
+  { label: "Drum",         id: "songotdrums" },
+  { label: "Acappella",    id: "songotacapellas" },
+  { label: "Sample Split", id: "samplesplit" },
+  { label: "Tik Tok",      id: "tiktok" },
+  { label: "Web Library",  id: "weblibrary" },
+];
+const grid = document.getElementById("channelsGrid");
+
+channels.forEach(ch => {
+  const card = document.createElement("div");
+  card.className = "channel-card";
+  card.innerHTML = `
+    <div class="channel-header">
+      <label><input type="checkbox" id="${ch.id}Channel"> ${ch.label}</label>
+    </div>
+    <div class="stems" id="${ch.id}Stems">
+      ${stems.map(s => `<div class="stem-toggle" data-stem="${s.toLowerCase()}">${s}</div>`).join("")}
+    </div>
+    <textarea id="${ch.id}Comment" class="channel-comment" placeholder="Comment for ${ch.label}..."></textarea>
+  `;
+  grid.appendChild(card);
+});
+
+document.querySelectorAll(".stem-toggle").forEach(btn => {
+  btn.addEventListener("click", function() {
+    this.classList.toggle("active");
+    const checkbox = this.closest(".channel-card").querySelector('input[type="checkbox"]');
+    if (this.classList.contains("active") && checkbox) checkbox.checked = true;
+  });
+});
+
+let activeEventSource = null;
+
+function runSplit() {
+  const playlistId = document.getElementById('playlistId').value.trim();
+  if (!playlistId) { alert("Please enter a Playlist ID or Spotify URL."); return; }
+
+  const selectedChannels = [];
+  const selectedStems = {};
+  const comments = {};
+
+  channels.forEach(ch => {
+    const enabled = document.getElementById(ch.id + "Channel").checked;
+    if (enabled) {
+      selectedChannels.push(ch.id);
+      const comment = document.getElementById(ch.id + "Comment").value;
+      if (comment) comments[ch.id] = comment;
+      const active = Array.from(document.querySelectorAll(`#${ch.id}Stems .stem-toggle.active`)).map(b => b.dataset.stem);
+      selectedStems[ch.id] = active.length > 0 ? active : stems.map(s => s.toLowerCase());
+    }
+  });
+
+  if (selectedChannels.length === 0) { alert("Please select at least one channel."); return; }
+
+  const payload = {
+    track_id: playlistId,
+    channels: selectedChannels,
+    selected_stems: selectedStems,
+    yt: document.getElementById('uploadYouTube').checked,
+    tiktok: false,
+    render_videos: false,
+    dry_run: false,
+    ec2: false,
+    trim: document.getElementById('trimTrack').checked,
+    trim_length: parseInt(document.getElementById('trimLength').value) || 0,
+    genre: document.getElementById('genre').value,
+    description: document.getElementById('videoDesc').value,
+    tags: document.getElementById('videoTags').value.split(',').map(t => t.trim()).filter(t => t),
+    privacy: document.getElementById('privacy').value,
+    made_for_kids: document.getElementById('audienceKids').checked,
+    monetize: document.getElementById('monetize').checked,
+    comments: comments,
+    startTime: document.getElementById('scheduleStart').value,
+    interval: document.getElementById('interval').value,
+    tz: "America/Chicago"
+  };
+
+  const btn = document.getElementById('splitBtn');
+  btn.disabled = true;
+  btn.textContent = "⏳ Processing...";
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressText').textContent = 'Starting…';
+  document.getElementById('trackInfo').textContent = '';
+
+  if (activeEventSource) { activeEventSource.close(); activeEventSource = null; }
+
+  fetch('/split', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(async res => {
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Server error (${res.status}): ${err.substring(0, 300)}`);
+    }
+    return res.json();
+  })
+  .then(data => {
+    console.log("Split started:", data);
+    document.getElementById('progressText').textContent = `✅ ${data.message} — ${data.tracks_processed} track(s)`;
+
+    // Listen to SSE for each session
+    const sessionIds = data.session_ids || [];
+    if (sessionIds.length > 0) {
+      listenToProgress(sessionIds, data.tracks_processed);
+    } else {
+      btn.disabled = false;
+      btn.textContent = "▶ Start Split";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Error: " + err.message);
+    btn.disabled = false;
+    btn.textContent = "▶ Start Split";
+  });
+}
+
+function listenToProgress(sessionIds, totalTracks) {
+  let completedSessions = 0;
+  const fill = document.getElementById('progressFill');
+  const text = document.getElementById('progressText');
+  const trackInfo = document.getElementById('trackInfo');
+  const btn = document.getElementById('splitBtn');
+
+  sessionIds.forEach(sessionId => {
+    const es = new EventSource(`/progress/${sessionId}`);
+    activeEventSource = es;
+
+    es.onmessage = function(e) {
+      try {
+        const data = JSON.parse(e.data);
+        const percent = data.percent || 0;
+        const message = data.message || '';
+        const meta = data.meta || {};
+
+        fill.style.width = percent + '%';
+        text.textContent = `${percent}% — ${message}`;
+
+        if (meta.artist && meta.title) {
+          const idx = meta.index ? `[${meta.index}/${meta.total_tracks}]` : '';
+          trackInfo.textContent = `🎵 ${idx} ${meta.artist} — ${meta.title}${meta.bpm ? ' | ' + meta.bpm + ' BPM' : ''}${meta.key ? ' | ' + meta.key : ''}`;
+        }
+
+        if (data.done || percent >= 100) {
+          es.close();
+          completedSessions++;
+          if (completedSessions >= sessionIds.length) {
+            fill.style.width = '100%';
+            text.textContent = '✅ All tracks complete!';
+            btn.disabled = false;
+            btn.textContent = "▶ Start Split";
+          }
+        }
+      } catch(err) {
+        console.error("SSE parse error:", err);
+      }
+    };
+
+    es.onerror = function() {
+      es.close();
+      completedSessions++;
+      if (completedSessions >= sessionIds.length) {
+        btn.disabled = false;
+        btn.textContent = "▶ Start Split";
+      }
+    };
+  });
+}
+</script>
+</body>
+</html>
