@@ -16,7 +16,46 @@ from __future__ import annotations
 
 import os
 import shutil
+import requests
 
+
+def upload_to_laravel(audio_path, track, stem_type, bpm, key, genre):
+    """Upload single stem to Laravel API"""
+    laravel_url = "https://puristic-filmily-bula.ngrok-free.dev"
+    
+    if not os.path.exists(audio_path):
+        return
+    
+    try:
+        bpm_int = int(float(bpm)) if bpm and bpm != 0 else 120
+        if bpm_int < 40 or bpm_int > 220:
+            bpm_int = 120
+        
+        key_value = key if key and key != "Unknown" else "C"
+        genre_value = genre if genre else "Hip Hop"
+        stem_type_value = stem_type.capitalize()
+        
+        with open(audio_path, 'rb') as f:
+            files = {'file': (os.path.basename(audio_path), f, 'audio/mpeg')}
+            data = {
+                'title': track.get('name', 'Unknown'),
+                'artist': track.get('artist', 'Unknown'),
+                'stem_type': stem_type_value,
+                'bpm': bpm_int,
+                'key': key_value,
+                'genre': genre_value
+            }
+            
+            response = requests.post(f"{laravel_url}/api/upload/single", files=files, data=data, timeout=60)
+            
+            if response.status_code in (200, 201):
+                print(f"✅ [LARAVEL] Uploaded {stem_type_value}")
+            else:
+                print(f"❌ [LARAVEL] {stem_type_value} failed: {response.status_code}")
+    except Exception as e:
+        print(f"❌ [LARAVEL] {stem_type} error: {e}")
+        
+        
 def _safe_component(name: str, max_len: int = 60) -> str:
     """
     Sanitize a path component for Windows:
@@ -478,6 +517,9 @@ class Content_download_main(ContentBase):
             self.update_progress(f" {stem_type} audio unavailable", meta)
             return False
 
+        if audio_path and os.path.exists(audio_path):
+                    upload_to_laravel(audio_path, track, stem_type, bpm, key, self.selected_genre)
+                    
         if self.trim_track:
             audio_path = self.trim_audio(audio_path, self.trim_length)
 

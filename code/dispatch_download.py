@@ -12,6 +12,103 @@ print("USING CONTENT_BASE FILE:", content_base.__file__)
 from content_base import ContentBase, CHANNEL_NAME_MAP
 from shared_state import get_progress, set_progress
 
+import requests
+import os
+
+
+# ============================================================
+# Laravel Upload Function
+# ============================================================
+# def upload_stem_to_laravel(audio_path, track_info, stem_type, bpm, key, genre):
+#     """Upload stem to Laravel API"""
+#     laravel_url = "https://puristic-filmily-bula.ngrok-free.dev"
+    
+#     if not laravel_url:
+#         print(f"⚠️ [LARAVEL] No API URL configured")
+#         return
+    
+#     if not os.path.exists(audio_path):
+#         print(f"⚠️ [LARAVEL] File not found: {audio_path}")
+#         return
+    
+#     try:
+#         # Handle BPM (required, integer, min 40, max 220)
+#         try:
+#             bpm_int = int(float(bpm)) if bpm else 120
+#         except (ValueError, TypeError):
+#             bpm_int = 120
+        
+#         if bpm_int < 40:
+#             bpm_int = 80
+#         elif bpm_int > 220:
+#             bpm_int = 120
+        
+#         # Handle Key
+#         key_value = key if key and key != "Unknown" and key.strip() else "C"
+        
+#         # Handle Genre
+#         genre_map = {
+#             'hiphop': 'Hip Hop',
+#             'hip-hop': 'Hip Hop',
+#             'rnb': 'R&B',
+#             'r&b': 'R&B',
+#             'jazz': 'Jazz',
+#             'soul': 'Soul',
+#             'rock': 'Rock',
+#             'pop': 'Pop',
+#             'electronic': 'Electronic',
+#             'world': 'World',
+#             'lo-fi': 'Lo-fi',
+#             'lofi': 'Lo-fi'
+#         }
+#         genre_value = genre_map.get(genre.lower(), 'Hip Hop') if genre else 'Hip Hop'
+        
+#         # Handle Stem Type
+#         stem_type_value = stem_type.capitalize()
+#         valid_stem_types = ['Acapella', 'Drums', 'Bass', 'Melody', 'Instrumental']
+#         if stem_type_value not in valid_stem_types:
+#             stem_type_value = 'Acapella'
+        
+#         with open(audio_path, 'rb') as f:
+#             files = {'file': (os.path.basename(audio_path), f, 'audio/mpeg')}
+#             data = {
+#                 'title': track_info.get('name', 'Unknown'),
+#                 'artist': track_info.get('artist', 'Unknown'),
+#                 'stem_type': stem_type_value,
+#                 'bpm': bpm_int,
+#                 'key': key_value,
+#                 'genre': genre_value
+#             }
+            
+#             print(f"📤 [LARAVEL] Uploading {stem_type_value}...")
+#             print(f"   Data: {data}")
+            
+#             response = requests.post(
+#                 f"{laravel_url}/api/upload/single",
+#                 files=files,
+#                 data=data,
+#                 timeout=60
+#             )
+            
+#             if response.status_code == 200 or response.status_code == 201:
+#                 result = response.json()
+#                 stem_id = result.get('stem', {}).get('id')
+#                 print(f"✅ [LARAVEL] Uploaded {stem_type_value} (ID: {stem_id})")
+#                 return result
+#             else:
+#                 print(f"❌ [LARAVEL] Upload failed: {response.status_code}")
+#                 print(f"   Response: {response.text[:500]}")
+#                 return None
+                
+#     except Exception as e:
+#         print(f"❌ [LARAVEL] Upload error: {e}")
+#         return None
+
+
+# ============================================================
+
+
+
 def get_optimal_device() -> str:
     if torch.cuda.is_available():
         print(f"[GPU] {torch.cuda.get_device_name(0)}")
@@ -265,6 +362,26 @@ def dispatch_stem_processing(track_id: str, selected_channels: list, args: dict,
                 if hasattr(processor, method):
                     getattr(processor, method)(track_id)
                     break
+            
+            # 🔥 UPLOAD STEMS TO LARAVEL
+            # if hasattr(processor, 'video_paths'):
+            #     for stem_type, video_path in processor.video_paths.items():
+            #         audio_path = None
+            #         if hasattr(processor, 'get_stem_path'):
+            #             audio_path = processor.get_stem_path(stem_type)
+            #         elif video_path:
+            #             audio_path = video_path.replace('.mp4', '.mp3')
+                    
+            #         if audio_path and os.path.exists(audio_path):
+            #             upload_stem_to_laravel(
+            #                 audio_path=audio_path,
+            #                 track_info=track_info,
+            #                 stem_type=stem_type,
+            #                 bpm=args.get("bpm", 120),
+            #                 key=args.get("key", "C"),
+            #                 genre=args.get("genre", "Hip Hop")
+            #             )
+            
             # Notify DB callback if present
             db_callback = args.get("db_save_callback")
             if db_callback:
@@ -307,7 +424,8 @@ def dispatch_stem_processing(track_id: str, selected_channels: list, args: dict,
     final.update({"message": "All processing complete", "percent": 100, "done": True})
     set_progress(session_id, final)
     print("[DONE] All processing complete")
-
+    
+    
 def process_all_tracks(track_ids, selected_channels, args=None, session_id="batch", max_concurrent=1, per_track_args=None):
     print(f"[BATCH] channels={selected_channels}")
     if not track_ids:
