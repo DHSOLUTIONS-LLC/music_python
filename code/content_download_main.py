@@ -21,7 +21,7 @@ import requests
 
 def upload_to_laravel(audio_path, track, stem_type, bpm, key, genre):
     """Upload single stem to Laravel API"""
-    laravel_url = "https://puristic-filmily-bula.ngrok-free.dev"
+    laravel_url = "https://www.songotsamples.com"
     
     if not os.path.exists(audio_path):
         return
