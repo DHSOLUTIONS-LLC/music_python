@@ -1,7 +1,7 @@
 import requests
 import os
 
-url = "https://puristic-filmily-bula.ngrok-free.dev/api/upload/single"
+url = "https://www.songotsamples.com/api/upload/single"
 test_file = "test.mp3"  # Create a small test MP3 file first
 
 # Create a small test MP3 if it doesn't exist
