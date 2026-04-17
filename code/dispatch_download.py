@@ -21,7 +21,7 @@ import os
 # ============================================================
 # def upload_stem_to_laravel(audio_path, track_info, stem_type, bpm, key, genre):
 #     """Upload stem to Laravel API"""
-#     laravel_url = "https://puristic-filmily-bula.ngrok-free.dev"
+#     laravel_url = "https://www.songotsamples.com"
     
 #     if not laravel_url:
 #         print(f"⚠️ [LARAVEL] No API URL configured")
